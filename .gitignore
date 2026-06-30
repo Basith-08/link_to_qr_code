@@ -1,11 +1,33 @@
+# Output barcode
 *.png
 *.svg
+
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 .DS_Store
+
+# Package build
 *.egg-info/
 dist/
 build/
+*.egg
+MANIFEST
+
+# pip install -e .
+pip-wheel-metadata/
+
+# Virtual environment
 .env
 .venv
 venv/
+env/
+ENV/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo

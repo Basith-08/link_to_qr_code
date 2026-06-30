@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "barcode-gen"
+version = "0.1.0"
+requires-python = ">=3.9"
+dependencies = [
+    "qrcode[pil]>=7.0",
+    "python-barcode>=0.14.0",
+]
+
+[project.scripts]
+barcode-gen = "barcode_gen.cli:main"

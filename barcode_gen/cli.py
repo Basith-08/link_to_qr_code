@@ -2,8 +2,8 @@ import argparse
 import os
 from pathlib import Path
 
-from .qr import make_qr
 from .code128 import make_code128
+from .qr import make_qr
 
 
 def main():

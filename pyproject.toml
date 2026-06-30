@@ -1,6 +1,6 @@
 [build-system]
 requires = ["setuptools>=68"]
-build-backend = "setuptools.backends.legacy:build"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "barcode-gen"
@@ -11,5 +11,20 @@ dependencies = [
     "python-barcode>=0.14.0",
 ]
 
+[tool.setuptools.packages.find]
+include = ["barcode_gen*"]
+
 [project.scripts]
 barcode-gen = "barcode_gen.cli:main"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

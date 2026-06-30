@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barcode Generator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #6366f1;
+      --accent-2: #8b5cf6;
+      --bg: #f0f0f5;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --text: #111827;
+      --muted: #6b7280;
+      --error: #ef4444;
+      --radius: 16px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      gap: 1rem;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 2rem 1.75rem;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,.06), 0 10px 40px -4px rgba(0,0,0,.08);
+    }
+
+    .logo {
+      font-size: 2rem;
+      margin-bottom: .5rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: .875rem;
+      margin-top: .25rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .field-label {
+      display: block;
+      font-size: .7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--muted);
+      margin-bottom: .4rem;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: .875rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color .2s;
+      background: #fafafa;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      background: #fff;
+    }
+
+    input[type="text"]::placeholder { color: #c4c4cf; }
+
+    .error-msg {
+      color: var(--error);
+      font-size: .8rem;
+      margin-top: .5rem;
+      min-height: 1.1rem;
+    }
+
+    .type-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem;
+      margin: 1.25rem 0 1.5rem;
+    }
+
+    .type-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .35rem;
+      padding: .875rem .5rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      background: #fafafa;
+      cursor: pointer;
+      transition: all .2s;
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--muted);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .type-btn .icon {
+      font-size: 1.75rem;
+      line-height: 1;
+    }
+
+    .type-btn.active {
+      border-color: var(--accent);
+      background: #f5f3ff;
+      color: var(--accent);
+    }
+
+    .type-btn:active { transform: scale(.97); }
+
+    .btn-generate {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-generate:active { transform: scale(.98); }
+    .btn-generate:disabled { opacity: .6; cursor: not-allowed; }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid rgba(255,255,255,.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .65s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .result {
+      margin-top: 1.5rem;
+      display: none;
+      animation: fadeUp .3s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-inner {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      background: #fafafa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .result img {
+      max-width: 100%;
+      max-height: 280px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .btn-download {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .4rem;
+      margin-top: .875rem;
+      padding: .75rem;
+      background: #f5f3ff;
+      color: var(--accent);
+      border: 1.5px solid #e0e7ff;
+      border-radius: var(--radius);
+      font-size: .9rem;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background .2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-download:active { background: #ede9fe; }
+
+    footer {
+      color: #bbb;
+      font-size: .75rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">⊞</div>
+  <h1>Barcode Generator</h1>
+  <p class="subtitle">Ubah link atau teks menjadi barcode instan</p>
+
+  <label class="field-label" for="input-text">URL / Teks</label>
+  <input
+    type="text"
+    id="input-text"
+    placeholder="https://contoh.com atau teks apapun"
+    autocomplete="off"
+    autocorrect="off"
+    autocapitalize="none"
+    spellcheck="false"
+  >
+  <div class="error-msg" id="error-msg"></div>
+
+  <div class="type-row">
+    <button class="type-btn active" data-type="qr" onclick="selectType(this)">
+      <span class="icon">⊞</span>
+      <span>QR Code</span>
+    </button>
+    <button class="type-btn" data-type="code128" onclick="selectType(this)">
+      <span class="icon">▌▌▌▌</span>
+      <span>Code128</span>
+    </button>
+  </div>
+
+  <button class="btn-generate" id="btn-gen" onclick="generate()">
+    Generate
+  </button>
+
+  <div class="result" id="result">
+    <div class="result-inner">
+      <img id="preview" src="" alt="Barcode">
+    </div>
+    <a class="btn-download" id="btn-download" href="#" download="barcode.png">
+      ↓ Download
+    </a>
+  </div>
+</div>
+
+<footer>barcode-gen · QR Code &amp; Code128</footer>
+
+<script>
+  let selectedType = 'qr';
+
+  function selectType(el) {
+    selectedType = el.dataset.type;
+    document.querySelectorAll('.type-btn').forEach(b =>
+      b.classList.toggle('active', b === el)
+    );
+  }
+
+  async function generate() {
+    const text = document.getElementById('input-text').value.trim();
+    const errEl = document.getElementById('error-msg');
+    const btn = document.getElementById('btn-gen');
+
+    errEl.textContent = '';
+
+    if (!text) {
+      errEl.textContent = 'Masukkan URL atau teks terlebih dahulu.';
+      document.getElementById('input-text').focus();
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Generating…';
+
+    try {
+      const res = await fetch('/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, type: selectedType }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        errEl.textContent = data.error || 'Terjadi kesalahan.';
+        return;
+      }
+
+      const preview = document.getElementById('preview');
+      const dlBtn = document.getElementById('btn-download');
+      const result = document.getElementById('result');
+
+      preview.src = data.image;
+      dlBtn.href = data.image;
+      dlBtn.download = data.filename;
+      result.style.display = 'block';
+
+      // re-trigger animation
+      result.style.animation = 'none';
+      result.offsetHeight;
+      result.style.animation = '';
+
+      result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch {
+      errEl.textContent = 'Tidak bisa terhubung ke server.';
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Generate';
+    }
+  }
+
+  document.getElementById('input-text').addEventListener('keydown', e => {
+    if (e.key === 'Enter') generate();
+  });
+</script>
+</body>
+</html>

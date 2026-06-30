@@ -1,2 +1,4 @@
 qrcode[pil]>=7.0
 python-barcode>=0.14.0
+flask>=3.0
+gunicorn>=21.0
